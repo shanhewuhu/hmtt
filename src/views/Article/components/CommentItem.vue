@@ -16,7 +16,7 @@
         <van-button
           size="mini"
           type="default"
-          @click="$emit('replay-show', true)"
+          @click="$emit('replay-show', item)"
           >回复</van-button
         >
       </p>
