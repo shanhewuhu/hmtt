@@ -6,18 +6,15 @@
         show-action
         placeholder="请输入搜索关键词"
         background="#3296fa"
-        @cancel="$router.go(-1)"
+        @cancel="$router.back()"
         @search="onSearch"
         autofocus
         @focus="isSearch = false"
       />
     </form>
-    <!-- 当搜索框是空的时候，显示搜索历史 -->
-    <!-- 当搜索框中有值的时候，显示搜索建议，当回车的时候显示搜索结果 -->
-    <SearchHistory v-if="searchText === ''" @search="onSearch"></SearchHistory>
-    <!-- 幽灵标签 -->
+    <SearchHistory v-if="searchText === ''"  @search="onSearch"></SearchHistory>
     <template v-else>
-      <SearchResult v-if="isSearch" :searchText="searchText"></SearchResult>
+      <SearchResult v-if="isSearch"  :searchText="searchText"></SearchResult>
       <SearchSuggest
         v-else
         :searchText="searchText"
@@ -28,29 +25,32 @@
 </template>
 
 <script>
-import SearchHistory from './components/SearchHistory.vue'
-import SearchSuggest from './components/SearchSuggest.vue'
-import SearchResult from './components/SearchResult.vue'
+import SearchHistory from './components/SearchHistory'
+import SearchResult from './components/SearchResult'
+import SearchSuggest from './components/SearchSuggest'
 export default {
   created () { },
   data () {
     return {
       searchText: '',
-      isSearch: false // 默认没有回车
+      isSearch: false
     }
   },
   methods: {
-    // 想实现的需求：在搜索input回车的时候给搜索建议单元格点击的时候
     onSearch (str) {
       this.searchText = str
       this.isSearch = true
-      this.$store.commit('setSearchHistoryList', str)
+      this.$store.commit('setsearchHistoryList', str)
     }
   },
   computed: {},
   watch: {},
   filters: {},
-  components: { SearchHistory, SearchSuggest, SearchResult }
+  components: {
+    SearchHistory,
+    SearchResult,
+    SearchSuggest
+  }
 }
 </script>
 

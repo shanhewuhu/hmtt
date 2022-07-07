@@ -1,5 +1,11 @@
 <template>
-  <van-cell class="article-item">
+<!-- $router.push({ name: 'article', params: { article_id: article.art_id } }) 路由跳转传参 -->
+  <van-cell
+    class="article-item"
+    @click="
+      $router.push({ name: 'article', params: { article_id: article.art_id } })
+    "
+  >
     <div slot="title" class="title van-multi-ellipsis--l2">
       {{ article.title }}
     </div>
@@ -16,7 +22,7 @@
       <div class="label-info-wrap">
         <span>{{ article.aut_name }}</span>
         <span>{{ article.comm_count }}评论</span>
-        <span>{{ article.pubdate | dateformat }}</span>
+        <span>{{ article.pubdate | dateformate }}</span>
       </div>
     </div>
     <van-image

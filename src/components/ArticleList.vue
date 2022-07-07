@@ -1,6 +1,10 @@
 <template>
   <van-cell-group>
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh" ref="pullrefresh">
+    <van-pull-refresh
+      v-model="refreshing"
+      @refresh="onRefresh"
+      ref="pullrefresh"
+    >
       <van-list
         v-model="loading"
         :finished="finished"
@@ -14,19 +18,23 @@
           value="内容"
           label="描述信息"
         /> -->
-        <ArticleItem v-for="(item, index) in articleList" :key="index" :article="item"></ArticleItem>
+        <ArticleItem
+          v-for="(item, index) in articleList"
+          :key="index"
+          :article="item"
+        ></ArticleItem>
       </van-list>
     </van-pull-refresh>
   </van-cell-group>
 </template>
 
 <script>
-import ArticleItem from './ArticleItem.vue'
 import { getArticleList } from '@/api/home'
-let ele = null // 全局
-let scrollTop = 0
+import ArticleItem from '@/components/ArticleItem.vue'
+
+let ele = null
+let scrolltop = 0
 export default {
-  name: 'ArticleList',
   props: {
     id: {
       type: Number,
@@ -36,15 +44,15 @@ export default {
   created () {
     this.getArticleList()
   },
-  mounted () { // 给有滚动条的pull-refresh绑定滚动事件，在滚动条最
-    // 组件最终渲染成html dom ，$el就是渲染好的根标签
+  mounted () {
     ele = this.$refs.pullrefresh.$el
+
     this.$refs.pullrefresh.$el.addEventListener('scroll', function () {
-      scrollTop = this.scrollTop
+      scrolltop = this.scrollTop
     })
   },
   activated () {
-    ele.scrollTop = scrollTop
+    ele.scrollTop = scrolltop
   },
   data () {
     return {
@@ -57,45 +65,46 @@ export default {
   },
   methods: {
     async getArticleList () {
-      if (this.refreshing) {
-        this.articleList = []
-        this.refreshing = false
-      }
       try {
+        this.refreshing = false
         const res = await getArticleList({ channel_id: this.id, timestamp: this.timestamp })
-        console.log(res)
+        this.articleList.push(...res.data.data.results)
+        // res参数中会返回一个时间戳 更新时间戳
         this.timestamp = res.data.data.pre_timestamp
-        // 诺数据已全部加载完毕，则直接将 finished 设置成 true
+
+        this.loading = false
         if (this.timestamp === null) {
           this.finished = true
         }
-        this.articleList.push(...res.data.data.results)
-        // 数据更新完毕后，将 loading 设置成 false
-        this.loading = false
-      } catch (err) {
-        console.log(err)
+      } catch (error) {
+        console.log(error)
       }
     },
     onLoad () {
       this.getArticleList()
     },
     onRefresh () {
-      console.log('下拉刷新触发了')
-      this.finished = false // 防止用户把加载更多搞结束了
-      this.loading = true // 重新加载数据
+      console.log('下拉刷新')
+      this.finished = false
+      this.loading = true
       this.timestamp = Date.now()
+      this.articleList = []
       this.getArticleList()
     }
   },
+
   computed: {},
   watch: {},
   filters: {},
-  components: { ArticleItem }
+  components: {
+    ArticleItem
+
+  }
 }
 </script>
 
 <style scoped lang='less'>
 .van-cell-group {
-  margin-top: 174px;
+  margin-top: 180px;
 }
 </style>

@@ -2,11 +2,11 @@
   <div class="search-history">
     <van-cell title="搜索历史">
       <template v-if="isDelete">
-        <span @click="$store.commit('delAllHistory')">全部删除</span
+        <span @click="$store.commit('allDelete', [])">全部删除</span
         >&nbsp;&nbsp;
         <span @click="isDelete = false">完成</span>
       </template>
-      <van-icon name="delete" @click="isDelete = true" v-else />
+      <van-icon name="delete" v-else @click="isDelete = true" />
     </van-cell>
     <van-cell
       :title="item"
@@ -17,7 +17,7 @@
       <van-icon
         name="close"
         v-if="isDelete"
-        @click.stop="$store.commit('delHistory', index)"
+        @click.stop="$store.commit('oneDelete', index)"
       />
     </van-cell>
   </div>

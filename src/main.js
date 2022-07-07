@@ -9,18 +9,18 @@ import 'amfe-flexible'
 // import '@/styles/icon.less'
 // import '@/styles/reset.less'
 import '@/styles/index.less'
-
-// 一次性把filters/index.js中所有的按需要导出全部导出来
-// 作为obj的属性
+// 将字体图标封装为全局组件
+import TtIcon from '@/components/TtIcon.vue'
 import * as obj from '@/filters'
+import FollowUser from '@/components/FollowUser.vue'
+import '@/components'
 Object.keys(obj).forEach(key => {
   Vue.filter(key, obj[key])
 })
-
-// import MyIcon from '@/components/MyIcon.vue'
-Vue.config.productionTip = false
-
+Vue.component('TtIcon', TtIcon)
+Vue.component('FollowUser', FollowUser)
 Vue.use(Vant)
+Vue.config.productionTip = false
 new Vue({
   router,
   store,

@@ -1,11 +1,6 @@
 <template>
   <div>
-    <van-cell
-      v-for="(item, index) in list"
-      :key="index"
-      icon="search"
-      @click="$emit('search', item)"
-    >
+    <van-cell icon="search" v-for="(item, index) in list" :key="index" @click="$emit('search',item)">
       <template #title>
         <span v-html="highlight(item)"></span>
       </template>
@@ -14,8 +9,7 @@
 </template>
 
 <script>
-// 响应式数据写在data，非响应式写在export default上面 这样性能高一点
-import { getSuggestionList } from '@/api/search'
+import { getSuggestList } from '@/api/search.js'
 let timer = null
 export default {
   props: {
@@ -24,18 +18,15 @@ export default {
       required: true
     }
   },
-  created () {
-    // console.log()
-  },
+  created () { },
   data () {
     return {
       list: []
     }
   },
   methods: {
-    // 因为这块要渲染的不是普通的字符串，而是html片段，所以必须要用v-html v-html是属性绑定，所以不能用过滤器
-    // 所以只能在methods中写
     highlight (str) {
+      // 过滤器中不能使用this 且不能对数据绑定进行使用
       const reg = new RegExp(this.searchText, 'g')
       return str.replace(reg, `<span style="color:red">${this.searchText}</span>`)
     }
@@ -45,21 +36,18 @@ export default {
     searchText: {
       handler (newVal) {
         clearTimeout(timer)
-        // async和await必须属于同一个函数
         timer = setTimeout(async () => {
           try {
-            const res = await getSuggestionList(newVal)
-            console.log(res)
+            const res = await getSuggestList(newVal)
             this.list = res.data.data.options
-          } catch (err) {
-            console.log(err)
+          } catch (error) {
+            console.log(error)
           }
         }, 900)
       },
-      immediate: true // 立即监听 组件在创建的时候就会监听一次
+      immediate: true
     }
   },
-  // 组件被销毁了，要清理掉定时器，避免内存泄漏
   beforeDestroy () {
     clearTimeout(timer)
   },
@@ -68,5 +56,5 @@ export default {
 }
 </script>
 
-<style scoped lang='less'>
+<style scoped>
 </style>

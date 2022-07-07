@@ -1,41 +1,29 @@
-// 为了方便项目中使用本地存储的时候 简化操作 封装 获取 设置 删除 全部删除工具函数
-// window.localStorage.setItem('a', "[a]")
-/**
- * 获取
- * @param {*} key
- * @returns
- */
+// 将数据持久化进行封装
+// 获取
 export function getItem (key) {
+  // 判断存储的类型 "['a']"类似此种数据用JSON.parse回报错
   const res = window.localStorage.getItem(key)
   try {
     return JSON.parse(res)
-  } catch (err) {
+  } catch (error) {
     return res
   }
 }
-/**
- * 设置
- * @param {*} key
- * @param {*} value
- */
+// 设置
 export function setItem (key, value) {
-  if (typeof value === 'object') { // 符合数据类型
+  if (typeof value === 'object') {
+    // 复杂数据类型
     window.localStorage.setItem(key, JSON.stringify(value))
   } else {
+    // 简单数据类型
     window.localStorage.setItem(key, value)
   }
 }
-/**
- * 根据key删除本地存储中其中一个
- * @param {*} key
- */
+// 根据key值删除本地存储中的数据
 export function removeItem (key) {
   window.localStorage.removeItem(key)
 }
-
-/**
- * 删除所有的本地存储
- */
+// 删除本地存储中的所有数据
 export function clearItem () {
   window.localStorage.clearItem()
 }

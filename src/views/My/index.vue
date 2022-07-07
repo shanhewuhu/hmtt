@@ -1,18 +1,14 @@
 <template>
   <div>
-    <!-- 登录后 -->
+    <!-- 登录后的样式 -->
+    <!-- 通过vuex中是否有token值 来判断是否登录 -->
     <div class="header header-login" v-if="user && user.token">
       <div class="avatar">
         <div class="left">
-          <van-image
-            round
-            width="1.76rem"
-            height="1.76rem"
-            :src="userInfo.photo"
-          />
+          <van-image round :src="userInfo.photo" />
           <span>{{ userInfo.name }}</span>
         </div>
-        <div class="button">编辑资料</div>
+        <div class="right">编辑资料</div>
       </div>
       <ul class="list">
         <li>
@@ -21,11 +17,11 @@
         </li>
         <li>
           <p>{{ userInfo.fans_count }}</p>
-          <p>关注</p>
+          <p>粉丝</p>
         </li>
         <li>
           <p>{{ userInfo.follow_count }}</p>
-          <p>粉丝</p>
+          <p>关注</p>
         </li>
         <li>
           <p>{{ userInfo.like_count }}</p>
@@ -33,38 +29,32 @@
         </li>
       </ul>
     </div>
-    <!-- 未登录 -->
-    <div class="header header-notlogin" v-else>
-      <div class="inner" @click="$router.push('/login')">
-        <img src="@/assets/mobile.png" alt="" />
-        <p>登录 / 注册</p>
+    <!-- 登录前的样式 -->
+    <div class="header header-nologin" v-else>
+      <div class="inner">
+        <div @click="$router.push('/login')">
+          <img src="@/assets/mobile.png" alt="" />
+          <p>登录 / 注册</p>
+        </div>
       </div>
     </div>
-
     <van-grid :column-num="2">
-      <van-grid-item icon="photo-o" text="收藏">
+      <van-grid-item text="收 藏">
         <template #icon>
           <i class="toutiao toutiao-shoucang"></i>
         </template>
       </van-grid-item>
-      <van-grid-item icon="photo-o" text="历史">
+      <van-grid-item text="历 史">
         <template #icon>
           <i class="toutiao toutiao-lishi"></i>
         </template>
       </van-grid-item>
     </van-grid>
-
     <van-cell-group>
       <van-cell title="消息通知" is-link />
       <van-cell title="小智同学" is-link />
     </van-cell-group>
-
-    <van-button
-      class="logout"
-      type="default"
-      block
-      v-if="user && user.token"
-      @click="logout"
+    <van-button type="default" @click="logout" block v-if="user && user.token"
       >退出登录</van-button
     >
   </div>
@@ -72,19 +62,17 @@
 
 <script>
 import { getUserInfo } from '@/api/user'
-// mapState,mapGetters -> computed
-// mapMutations,mapActions -> methods
 import { mapState } from 'vuex'
 export default {
-  name: 'My',
+  name: 'my',
   async created () {
     if (this.user && this.user.token) {
       try {
         const res = await getUserInfo()
-        console.log('res', res)
+        console.log(res)
         this.userInfo = res.data.data
-      } catch (err) {
-        console.log(err)
+      } catch (error) {
+        console.log(error)
       }
     }
   },
@@ -96,10 +84,10 @@ export default {
   methods: {
     async logout () {
       try {
-        await this.$dialog.confirm({ message: '确定退出吗' })
+        await this.$dialog.confirm({ message: '确认退出' })
         this.$store.commit('setUser', {})
-      } catch (err) {
-        console.log(err)
+      } catch (error) {
+        console.log(error)
       }
     }
   },
@@ -119,60 +107,46 @@ export default {
   background: rgba(50, 150, 250, 0.7) url("@/assets/banner.png") no-repeat;
   background-size: cover;
 }
-.header-notlogin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  img {
-    width: 132px;
-    height: 132px;
-    margin-bottom: 15px;
-  }
-  p {
-    font-size: 28px;
-    font-weight: 400;
-    color: #ffffff;
-  }
-}
 .header-login {
   padding-top: 116px;
   .avatar {
-    margin-bottom: 55px;
-    padding-left: 32px;
-    padding-right: 33px;
+    padding: 0 33px 0 32px;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 50px;
     align-items: center;
-    .button {
-      width: 116px;
-      height: 33px;
-      line-height: 32px;
-      text-align: center;
-      background-color: #ffffff;
-      border-radius: 16px;
-      font-size: 20px;
-      font-weight: 400;
-      color: #666666;
-    }
     .left {
       display: flex;
       align-items: center;
+      .van-image {
+        width: 132px;
+        height: 132px;
+      }
       span {
         margin-left: 22px;
         font-size: 30px;
-        font-weight: 400;
         color: #ffffff;
       }
+    }
+    .right {
+      width: 116px;
+      height: 33px;
+      text-align: center;
+      line-height: 33px;
+      background-color: #ffffff;
+      border-radius: 16px;
+      font-size: 20px;
+      color: #666666;
     }
   }
   .list {
     display: flex;
     li {
-      flex: 1;
       text-align: center;
+      flex: 1;
       p {
         color: #fff;
-        font-weight: 400;
+        font-weight: normal;
         &:nth-child(1) {
           font-size: 36px;
         }
@@ -183,11 +157,27 @@ export default {
     }
   }
 }
-
+.header-nologin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .inner {
+    img {
+      width: 132px;
+      height: 132px;
+      margin-bottom: 15px;
+    }
+    p {
+      width: 145px;
+      height: 28px;
+      font-size: 28px;
+      color: #ffffff;
+    }
+  }
+}
 .toutiao {
   font-size: 45px;
 }
-
 .van-grid-item {
   &:nth-child(1) {
     color: #eb5253;
@@ -196,16 +186,16 @@ export default {
     color: #ff9d1d;
   }
 }
-
-/deep/.van-grid-item__text {
+/deep/ .van-grid-item__text {
   font-size: 28px;
 }
-
 .van-cell-group {
-  margin: 9px 0;
+  margin-top: 9px;
+  margin-bottom: 9px;
 }
-
-.logout {
+.van-button {
+  height: 104px;
+  font-size: 30px;
   color: #d86262;
 }
 </style>

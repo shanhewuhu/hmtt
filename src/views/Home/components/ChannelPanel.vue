@@ -1,42 +1,37 @@
 <template>
   <div>
-    <div class="channel-container">
+    <div class="topPanel myTopPanel">
       <div class="title">
-        <h3>我的频道</h3>
+        <h4>我的频道</h4>
         <van-button
-          size="mini"
           plain
-          type="danger"
           round
+          type="danger"
           @click="isCloseShow = !isCloseShow"
           >{{ isCloseShow ? "完成" : "编辑" }}</van-button
         >
       </div>
       <van-row>
-        <van-col span="6" v-for="(item, index) in channels" :key="item.id">
-          <div
-            @click="onClick(index)"
-            class="inner"
-            :style="{ color: active === index ? 'red' : '' }"
-          >
+        <van-col
+          span="6"
+          @click="change(index)"
+          v-for="(item, index) in channels"
+          :key="item.id"
+        >
+          <div class="inner" :style="{ color: index === active ? 'red' : '' }">
             {{ item.name }}
-            <van-icon
-              v-show="isCloseShow"
-              name="close"
-              v-if="index !== 0"
-              :style="{ color: active === index ? 'red' : '' }"
-            />
+            <van-icon name="close" v-show="isCloseShow" v-if="index !== 0" />
           </div>
         </van-col>
       </van-row>
     </div>
 
-    <div class="channel-container">
+    <div class="topPanel">
       <div class="title">
-        <h3>推荐频道</h3>
+        <h4>推荐频道</h4>
       </div>
       <van-row>
-        <van-col span="6" v-for="item in recommendChannels" :key="item.id">
+        <van-col span="6" v-for="item in surplusArticle" :key="item.id">
           <div class="inner van-ellipsis" @click="add(item.id)">
             +{{ item.name }}
           </div>
@@ -47,54 +42,52 @@
 </template>
 
 <script>
-import { getAllArticleList, saveChannels } from '@/api/home'
 import { setItem } from '@/utils/storage'
+import { getAllArticleList, saveChannels } from '@/api/home'
 const CHANNELS = 'CHANNELS'
 export default {
-  name: 'ChannelsPanel',
   props: {
     channels: {
       type: Array,
-      required: true
+      requrired: true
     },
     active: {
       type: Number,
-      required: true
+      requrired: true
     }
   },
   async created () {
     try {
       const res = await getAllArticleList()
-      console.log(res)
-      this.recommendChannels = res.data.data.channels.filter(item => this.channels.every(item1 => item1.id !== item.id))
-    } catch (err) {
-      console.log(err)
+      this.surplusArticle = res.data.data.channels.filter(item => this.channels.every(item1 => item1.id !== item.id))
+    } catch (error) {
+      console.log(error)
     }
   },
   data () {
     return {
-      recommendChannels: [],
+      surplusArticle: [],
       isCloseShow: false
     }
   },
   methods: {
     add (id) {
-      const index = this.recommendChannels.findIndex(item => item.id === id)
-      this.channels.push(this.recommendChannels[index])
-      this.recommendChannels.splice(index, 1)
+      const index = this.surplusArticle.findIndex(item => item.id === id)
+      this.channels.push(this.surplusArticle[index])
+      this.surplusArticle.splice(index, 1)
     },
-    onClick (index) {
+    change (index) {
       if (this.isCloseShow) {
-        if (index === 0) return // 推荐不能删除，所以要排除掉
         // 删除
+        if (index === 0) return
         const obj = this.channels[index]
         this.channels.splice(index, 1)
-        this.recommendChannels.push(obj)
+        this.surplusArticle.push(obj)
         if (index < this.active) {
-          this.$emit('del-event', this.active - 1)
+          this.$emit('del-active', this.active - 1)
         }
       } else {
-        // 切换高亮active
+        // 跳转
         this.$emit('change-active', index)
       }
     }
@@ -102,27 +95,27 @@ export default {
   computed: {},
   watch: {
     channels: {
-      // 登录过 把持久化放在后台服务器（用ajax）未登录 放本地存储
       async handler (newVal) {
-        if (this.$store.state.user && this.$store.state.user.token) { // 没登过
-          console.log(123)
+        // 登录过
+        if (this.$store.state.user && this.$store.state.user.token) {
           const arr = []
           newVal.forEach((item, index) => {
-            arr.push({ id: item.id, seq: index })
+            const obj = { id: item.id, seq: index }
+            arr.push(obj)
           })
-          console.log(arr)
-          // 先把频道处理一下
+          // 更新用户设置关注的频道
           try {
             const res = await saveChannels(arr)
             console.log(res)
-          } catch (err) {
-            console.log(err)
+          } catch (error) {
+            console.log(arr)
           }
-        } else { // 没有登录
+        } else {
+          // 没有登录过
           setItem(CHANNELS, newVal)
         }
       },
-      deep: true // 深度监听
+      deep: true
     }
   },
   filters: {},
@@ -131,47 +124,47 @@ export default {
 </script>
 
 <style scoped lang='less'>
-.channel-container {
-  .title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-left: 24px;
-    padding-right: 16px;
-    margin-bottom: 48px;
-    h3 {
-      margin-top: 52px;
-      font-size: 32px;
-      font-weight: 400;
-      color: #333333;
-    }
-    .van-button {
-      width: 104px;
-      height: 48px;
-      border-radius: 20px;
-    }
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  h4 {
+    font-size: 32px;
+    color: #333333;
+    font-weight: normal;
   }
-}
-.inner {
-  width: 160px;
-  height: 86px;
-  background: #f4f5f6;
-  border-radius: 6px;
-  font-size: 28px;
-  font-weight: 400;
-  color: #222;
-  text-align: center;
-  line-height: 86px;
-  margin-left: 14px;
-  position: relative;
-  .van-icon-close {
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: translate(50%, -50%);
+  .van-button {
+    width: 112px;
+    text-align: center;
+    line-height: 48px;
+    height: 48px;
+    font-size: 12px;
   }
 }
 .van-col {
-  margin-bottom: 22px;
+  margin-top: 30px;
+  .inner {
+    position: relative;
+    width: 160px;
+    height: 86px;
+    text-align: center;
+    line-height: 86px;
+    background-color: #f4f5f6;
+    border-radius: 6px;
+    font-size: 28px;
+    color: #222222;
+    letter-spacing: 1px;
+    margin-left: 14px;
+    .van-icon {
+      font-size: 30px;
+      position: absolute;
+      top: -12px;
+      right: -12px;
+    }
+  }
+}
+.myTopPanel {
+  margin-bottom: 30px;
 }
 </style>

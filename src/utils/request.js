@@ -1,19 +1,16 @@
 import axios from 'axios'
 import store from '@/store'
+
 const instance = axios.create({
   baseURL: 'http://toutiao.itheima.net/v1_0',
   timeout: 5000
 })
-export default instance
-// 请求拦截器：一推ajax请求配置项都要做的事情，就可以提取到请求拦截器，只需要写一次
-// 添加请求拦截器
-// interceptors -> 拦截器
+
+// 添加请求拦截器 多个ajax发送请求时都需要做得事情 就可以使用请求拦截器
 instance.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   if (store.state.user && store.state.user.token) {
-    config.headers = {
-      Authorization: 'Bearer ' + store.state.user.token
-    }
+    config.headers = { Authorization: 'Bearer ' + store.state.user.token }
   }
   return config
 }, function (error) {
@@ -29,3 +26,5 @@ instance.interceptors.response.use(function (response) {
   // 对响应错误做点什么
   return Promise.reject(error)
 })
+
+export default instance
